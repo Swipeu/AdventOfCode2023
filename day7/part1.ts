@@ -37,7 +37,7 @@ function compareHands(a: IHand, b: IHand) {
 
     return 0;
 }
-//\1*(.)(?=.*\2)
+
 function getHandType(hand: string) {
 
     // Five of a kind

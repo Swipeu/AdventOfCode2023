@@ -37,18 +37,19 @@ function compareHands(a: IHand, b: IHand) {
 
     return 0;
 }
-//\1*(.)(?=.*\2)
+
 function getHandType(hand: string) {
 
-    hand = hand.split("").sort((a, b) => a === "J" ? 1 : (b === "J" ? -1 : 0)).join("")
+    const jokers = hand.match(/J/g).length;
+    const sortedHand = hand.split("").map(c => getCardValue(c)).sort()
 
     // Five of a kind
-    if (hand.match(/(.)(?=.*\1.*\1.*\1.*\1)/)) {
+    if (hand.match(getRegularExpression(5, jokers))) {
         return 0;
     }
 
     // Four of a kind
-    if (hand.match(/(.)(?=.*\1.*\1.*\1)/)) {
+    if (hand.match(getRegularExpression(4, jokers))) {
         return 1;
     }
 
@@ -58,22 +59,38 @@ function getHandType(hand: string) {
     }
 
     // Three of a kind
-    if (hand.match(/(.)(?=.*\1.*\1)/)) {
+    if (hand.match(getRegularExpression(3, jokers))) {
         return 3;
     }
 
     // Two pair
-    if ((hand.match(/(.)(?=.*\1)/g)?.length ?? 0) > 1) {
+    if (hand.match(getRegularExpression(5, jokers))?.length ?? 0 > 2) {
         return 4;
     }
 
     // One pair
-    if (hand.match(/(?:J|(.)(?=.*\1))/)) {
+    if (hand.match(getRegularExpression(2, jokers))) {
         return 5;
     }
 
     // High card
     return 6;
+}
+
+function hasNumbers(targetCount: number, numbers: number[]){
+    
+}
+
+function getRegularExpression(targetAmount: number, jokers: number){
+    if(targetAmount - jokers <= 0){
+        return new RegExp(`.`);
+    }
+
+    if(targetAmount - jokers <= 1){
+        return new RegExp(`[^J]`);
+    }
+
+    return new RegExp(`([^J])(?=.${".*\\1".repeat(targetAmount-jokers)}`);
 }
 
 function getCardValue(card: string) {
@@ -84,10 +101,10 @@ function getCardValue(card: string) {
             return 13;
         case "Q":
             return 12;
-        case "J":
-            return 11;
         case "T":
             return 10;
+        case "J":
+            return 0;
         default:
             return parseInt(card);
     }
